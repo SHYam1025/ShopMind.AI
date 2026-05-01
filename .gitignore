@@ -1,0 +1,10 @@
+.env
+*.db
+venv/
+__pycache__/
+*.log
+node_modules/
+playwright/.cache/
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap');
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0A0A0F;--surface:#111118;--surface2:#18181F;--surface3:#1E1E28;
+    --border:#2A2A38;--border2:#343448;
+    --accent:#6C63FF;--accent2:#9B93FF;--accent3:#4ECCA3;
+    --text:#F0EFF8;--text2:#9896A8;--text3:#5A5870;
+    --amber:#F5A623;--red:#FF5C5C;--green:#4ECCA3;
+    --amazon:#FF9900;--flipkart:#2874F0;--croma:#9B2335;--zepto:#7C3AED;--myntra:#FF3F6C;
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0}
+  
+  .app{display:flex;flex-direction:column;min-height:100vh}
+  
+  /* Header */
+  .header{
+    background:var(--surface);border-bottom:1px solid var(--border);
+    padding:14px 28px;display:flex;align-items:center;justify-content:space-between;
+    position:sticky;top:0;z-index:100;
+  }
+  .logo{display:flex;align-items:center;gap:10px}
+  .logo-icon{
+    width:32px;height:32px;border-radius:8px;
+    background:linear-gradient(135deg,var(--accent),var(--accent3));
+    display:flex;align-items:center;justify-content:center;font-size:16px;
+  }
+  .logo-text{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.3px}
+  .logo-badge{
+    font-size:10px;background:rgba(108,99,255,0.2);color:var(--accent2);
+    border:1px solid rgba(108,99,255,0.3);border-radius:4px;padding:2px 7px;font-weight:500;
+  }
+  .header-right{display:flex;align-items:center;gap:16px}
+  .api-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+  .nav-btn{
+    padding:6px 14px;border:1px solid var(--border2);border-radius:6px;
+    background:transparent;color:var(--text2);font-size:13px;cursor:pointer;transition:.15s;
+  }
+  .nav-btn:hover{background:var(--surface2);color:var(--text)}
+  .nav-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  
+  /* Main Layout */
+  .main{display:grid;grid-template-columns:320px 1fr;gap:0;flex:1}
+  
+  /* Sidebar */
+  .sidebar{
+    background:var(--surface);border-right:1px solid var(--border);
+    padding:20px;display:flex;flex-direction:column;gap:20px;overflow-y:auto;max-height:calc(100vh - 60px);
+    position:sticky;top:60px;
+  }
+  .section-label{font-size:10px;font-weight:600;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:8px}
+  
+  /* Search Box */
+  .search-area{}
+  .search-input-wrap{position:relative;margin-bottom:10px}
+  .search-input{
+    width:100%;background:var(--surface2);border:1px solid var(--border);
+    border-radius:10px;padding:12px 14px 12px 40px;color:var(--text);font-size:14px;
+    font-family:'DM Sans',sans-serif;outline:none;transition:.15s;
+  }
+  .search-input::placeholder{color:var(--text3)}
+  .search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,0.15)}
+  .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;opacity:0.5}
+  
+  .image-upload-zone{
+    border:1.5px dashed var(--border2);border-radius:10px;padding:16px;text-align:center;
+    cursor:pointer;transition:.15s;color:var(--text2);font-size:13px;margin-bottom:10px;
+  }
+  .image-upload-zone:hover{border-color:var(--accent);background:rgba(108,99,255,0.05)}
+  .image-upload-zone.has-image{border-color:var(--green);background:rgba(78,204,163,0.05)}
+  .upload-icon{font-size:22px;margin-bottom:4px}
+  
+  .search-btn{
+    width:100%;padding:11px;background:linear-gradient(135deg,var(--accent),#8B7FF5);
+    border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:500;
+    cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .search-btn:hover{opacity:0.9;transform:translateY(-1px)}
+  .search-btn:active{transform:translateY(0)}
+  .search-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+  
+  /* Platform filter */
+  .platform-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{
+    padding:5px 10px;border:1px solid var(--border);border-radius:20px;
+    font-size:12px;cursor:pointer;transition:.15s;color:var(--text2);
+  }
+  .chip.active{color:#fff;border-color:transparent}
+  .chip[data-p=amazon].active{background:var(--amazon)}
+  .chip[data-p=flipkart].active{background:var(--flipkart)}
+  .chip[data-p=croma].active{background:var(--croma)}
+  .chip[data-p=zepto].active{background:var(--zepto)}
+  .chip[data-p=myntra].active{background:var(--myntra)}
+  .chip:not(.active):hover{background:var(--surface2);border-color:var(--border2)}
+  
+  /* Agent Pipeline */
+  .pipeline{display:flex;flex-direction:column;gap:6px}
+  .agent-row{
+    display:flex;align-items:center;gap:10px;padding:9px 12px;
+    border-radius:8px;background:var(--surface2);border:1px solid var(--border);
+    transition:.2s;
+  }
+  .agent-row.running{border-color:var(--accent);background:rgba(108,99,255,0.08)}
+  .agent-row.done{border-color:var(--green);background:rgba(78,204,163,0.06)}
+  .agent-row.error{border-color:var(--red);background:rgba(255,92,92,0.06)}
+  .agent-icon{font-size:16px;width:24px;text-align:center}
+  .agent-info{flex:1}
+  .agent-name{font-size:12px;font-weight:500;color:var(--text)}
+  .agent-msg{font-size:11px;color:var(--text2);margin-top:1px}
+  .agent-status-dot{width:8px;height:8px;border-radius:50%;background:var(--border2);flex-shrink:0}
+  .agent-row.running .agent-status-dot{background:var(--accent);animation:pulse 1s infinite}
+  .agent-row.done .agent-status-dot{background:var(--green)}
+  .agent-row.error .agent-status-dot{background:var(--red)}
+  
+  /* Content area */
+  .content{padding:24px;overflow-y:auto}
+  
+  /* Empty state */
+  .empty-state{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-height:400px;text-align:center;gap:12px;
+  }
+  .empty-icon{font-size:48px;opacity:0.3}
+  .empty-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:600;color:var(--text2)}
+  .empty-sub{font-size:14px;color:var(--text3);max-width:300px;line-height:1.6}
+  
+  /* Results */
+  .results-header{
+    display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;
+  }
+  .results-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:600}
+  .results-meta{font-size:13px;color:var(--text2)}
+  
+  .recognized-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:14px;
+  }
+  .rec-icon{font-size:24px}
+  .rec-name{font-size:16px;font-weight:500}
+  .rec-specs{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+  .rec-spec{
+    font-size:11px;padding:2px 8px;border-radius:4px;
+    background:rgba(108,99,255,0.15);color:var(--accent2);border:1px solid rgba(108,99,255,0.2);
+  }
+  .rec-conf{
+    margin-left:auto;font-size:12px;color:var(--text2);text-align:right;
+  }
+  .conf-val{font-size:18px;font-weight:500;color:var(--accent2)}
+  
+  .product-grid{display:grid;grid-template-columns:1fr;gap:14px}
+  
+  .product-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    padding:18px;transition:.2s;cursor:pointer;position:relative;overflow:hidden;
+  }
+  .product-card::before{
+    content:'';position:absolute;inset:0;border-radius:14px;opacity:0;transition:.2s;
+    background:linear-gradient(135deg,rgba(108,99,255,0.05),rgba(78,204,163,0.05));
+    pointer-events:none;
+  }
+  .product-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+  .product-card:hover::before{opacity:1}
+  .product-card.best{border-color:var(--accent);box-shadow:0 0 0 1px rgba(108,99,255,0.2)}
+  
+  .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .card-left{flex:1}
+  .platform-tag{
+    display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;
+    padding:3px 9px;border-radius:5px;margin-bottom:7px;
+  }
+  .product-title{font-size:15px;font-weight:400;line-height:1.4;color:var(--text)}
+  .card-right{text-align:right;flex-shrink:0}
+  .price-main{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--text)}
+  .price-original{font-size:13px;color:var(--text3);text-decoration:line-through}
+  .discount-badge{
+    font-size:11px;background:rgba(78,204,163,0.15);color:var(--green);
+    border:1px solid rgba(78,204,163,0.25);border-radius:4px;padding:2px 7px;display:inline-block;margin-top:3px;
+  }
+  
+  .card-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+  .meta-item{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text2)}
+  .meta-dot{color:var(--text3)}
+  
+  .card-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+  
+  .coupon-pill{
+    display:flex;align-items:center;gap:6px;font-size:12px;
+    background:rgba(245,166,35,0.1);border:1px dashed rgba(245,166,35,0.3);
+    color:var(--amber);border-radius:6px;padding:5px 10px;
+  }
+  .score-bar{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)}
+  .score-track{width:60px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+  .score-fill{height:100%;border-radius:2px;background:var(--green)}
+  
+  .order-btn{
+    padding:7px 16px;background:var(--accent);border:none;border-radius:8px;
+    color:#fff;font-size:13px;font-weight:500;cursor:pointer;transition:.15s;
+    font-family:'DM Sans',sans-serif;
+  }
+  .order-btn:hover{background:#7B73FF}
+  
+  .best-label{
+    position:absolute;top:0;right:16px;
+    background:linear-gradient(135deg,var(--accent),var(--accent3));
+    color:#fff;font-size:10px;font-weight:600;letter-spacing:0.5px;
+    padding:3px 10px 5px;border-radius:0 0 8px 8px;
+  }
+  
+  /* Order Modal Overlay */
+  .modal-wrap{
+    position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;
+    display:flex;align-items:center;justify-content:center;
+    backdrop-filter:blur(4px);
+  }
+  .modal{
+    background:var(--surface);border:1px solid var(--border);border-radius:16px;
+    padding:28px;width:480px;max-height:85vh;overflow-y:auto;
+  }
+  .modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:600;margin-bottom:4px}
+  .modal-sub{font-size:13px;color:var(--text2);margin-bottom:20px}
+  .form-row{margin-bottom:14px}
+  .form-label{font-size:12px;color:var(--text2);margin-bottom:5px;display:block}
+  .form-input{
+    width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+    padding:9px 12px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;
+  }
+  .form-input:focus{border-color:var(--accent)}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .modal-actions{display:flex;gap:10px;margin-top:20px}
+  .btn-cancel{
+    flex:1;padding:10px;background:transparent;border:1px solid var(--border2);
+    border-radius:8px;color:var(--text2);font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;
+  }
+  .btn-place{
+    flex:2;padding:10px;background:var(--accent);border:none;border-radius:8px;
+    color:#fff;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;
+  }
+  .btn-place:hover{background:#7B73FF}
+  .payment-opts{display:flex;gap:8px}
+  .pay-opt{
+    flex:1;padding:8px;border:1px solid var(--border);border-radius:8px;text-align:center;
+    font-size:13px;cursor:pointer;transition:.15s;color:var(--text2);
+  }
+  .pay-opt.selected{border-color:var(--accent);background:rgba(108,99,255,0.1);color:var(--accent2)}
+  
+  /* Order History Tab */
+  .orders-list{display:flex;flex-direction:column;gap:12px}
+  .order-row{
+    background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;display:flex;align-items:center;gap:14px;
+  }
+  .order-platform-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .order-info{flex:1}
+  .order-id-text{font-size:12px;color:var(--text3);margin-bottom:2px}
+  .order-title{font-size:14px;font-weight:400}
+  .order-meta{font-size:12px;color:var(--text2);margin-top:3px}
+  .order-amount{font-family:'Syne',sans-serif;font-size:16px;font-weight:600;color:var(--green)}
+  
+  /* Toast */
+  .toast{
+    position:fixed;bottom:24px;right:24px;z-index:300;
+    background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    padding:12px 18px;display:flex;align-items:center;gap:10px;
+    font-size:14px;box-shadow:0 8px 30px rgba(0,0,0,0.4);
+    transform:translateY(100px);opacity:0;transition:.3s;
+  }
+  .toast.show{transform:translateY(0);opacity:1}
+  .toast.success{border-color:var(--green)}
+  .toast.error{border-color:var(--red)}
+  
+  /* Loading spinner */
+  .spinner{
+    width:16px;height:16px;border:2px solid rgba(255,255,255,0.2);
+    border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .hidden{display:none!important}
+  
+  /* Profile view */
+  .profile-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;
+  }
+  .profile-field{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px}
+  .profile-field:last-child{border:none}
+  .profile-key{color:var(--text2)}
+  .profile-val{color:var(--text);font-weight:400}
+  
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+  .stat-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    padding:16px;text-align:center;
+  }
+  .stat-num{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:var(--accent2)}
+  .stat-label{font-size:12px;color:var(--text3);margin-top:3px}
+  
+  #img-preview{max-width:100%;max-height:80px;border-radius:6px;object-fit:cover;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">🛍</div>
+      <span class="logo-text">ShopMind</span>
+      <span class="logo-badge">Gemini AI</span>
+    </div>
+    <div class="header-right">
+      <div class="api-status">
+        <div class="dot"></div>
+        <span id="api-status-text">Connected · FastAPI :8000</span>
+      </div>
+      <button class="nav-btn active" onclick="setTab('search')">Search</button>
+      <button class="nav-btn" onclick="setTab('orders')">Orders</button>
+      <button class="nav-btn" onclick="setTab('profile')">Profile</button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Search Input -->
+      <div class="search-area">
+        <div class="section-label">Product Search</div>
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" id="query-input" placeholder="e.g. Sony WH-1000XM5 headphones" />
+        </div>
+        <div class="image-upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+          <div class="upload-icon">📷</div>
+          <div>Upload product image</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">PNG, JPG up to 5MB</div>
+          <img id="img-preview" class="hidden" />
+        </div>
+        <input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleImageUpload(this)">
+        <button class="search-btn" id="search-btn" onclick="runSearch()">
+          <span id="search-btn-content">✦ Find Best Deals</span>
+        </button>
+      </div>
+
+      <!-- Platform Filter -->
+      <div>
+        <div class="section-label">Platforms</div>
+        <div class="platform-chips">
+          <span class="chip active" data-p="amazon" onclick="toggleChip(this)">Amazon</span>
+          <span class="chip active" data-p="flipkart" onclick="toggleChip(this)">Flipkart</span>
+          <span class="chip active" data-p="croma" onclick="toggleChip(this)">Croma</span>
+          <span class="chip active" data-p="zepto" onclick="toggleChip(this)">Zepto</span>
+          <span class="chip active" data-p="myntra" onclick="toggleChip(this)">Myntra</span>
+        </div>
+      </div>
+
+      <!-- Agent Pipeline -->
+      <div>
+        <div class="section-label">Agent Pipeline</div>
+        <div class="pipeline" id="pipeline">
+          <div class="agent-row" id="ag-recognition">
+            <div class="agent-icon">🔎</div>
+            <div class="agent-info">
+              <div class="agent-name">Recognition Agent</div>
+              <div class="agent-msg" id="ag-recognition-msg">Gemini Vision · identify product</div>
+            </div>
+            <div class="agent-status-dot"></div>
+          </div>
+          <div class="agent-row" id="ag-search">
+            <div class="agent-icon">🌐</div>
+            <div class="agent-info">
+              <div class="agent-name">Search Agent</div>
+              <div class="agent-msg" id="ag-search-msg">Parallel scrape 5 platforms</div>
+            </div>
+            <div class="agent-status-dot"></div>
+          </div>
+          <div class="agent-row" id="ag-deals">
+            <div class="agent-icon">🏷</div>
+            <div class="agent-info">
+              <div class="agent-name">Deal Agent</div>
+              <div class="agent-msg" id="ag-deals-msg">CouponDunia · live coupons</div>
+            </div>
+            <div class="agent-status-dot"></div>
+          </div>
+          <div class="agent-row" id="ag-filter">
+            <div class="agent-icon">🛡</div>
+            <div class="agent-info">
+              <div class="agent-name">Filter Agent</div>
+              <div class="agent-msg" id="ag-filter-msg">Genuineness · anti-fake scoring</div>
+            </div>
+            <div class="agent-status-dot"></div>
+          </div>
+          <div class="agent-row" id="ag-complete">
+            <div class="agent-icon">✅</div>
+            <div class="agent-info">
+              <div class="agent-name">Complete</div>
+              <div class="agent-msg" id="ag-complete-msg">Results ready</div>
+            </div>
+            <div class="agent-status-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Search Suggestions -->
+      <div>
+        <div class="section-label">Quick Search</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button class="nav-btn" onclick="quickSearch('Sony WH-1000XM5 headphones')" style="text-align:left;padding:7px 10px;font-size:12px">🎧 Sony WH-1000XM5</button>
+          <button class="nav-btn" onclick="quickSearch('Apple iPhone 15 Pro 256GB')" style="text-align:left;padding:7px 10px;font-size:12px">📱 iPhone 15 Pro</button>
+          <button class="nav-btn" onclick="quickSearch('Nike Air Max 270 running shoes')" style="text-align:left;padding:7px 10px;font-size:12px">👟 Nike Air Max 270</button>
+          <button class="nav-btn" onclick="quickSearch('Samsung Galaxy S24 Ultra')" style="text-align:left;padding:7px 10px;font-size:12px">📲 Samsung S24 Ultra</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content" id="content-area">
+      <!-- Search Tab -->
+      <div id="tab-search">
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon">🛒</div>
+          <div class="empty-title">Ready to find best deals</div>
+          <div class="empty-sub">Enter a product name or upload an image. ShopMind will search Amazon, Flipkart, Croma, Zepto & Myntra simultaneously.</div>
+        </div>
+        <div id="results-area" class="hidden"></div>
+      </div>
+
+      <!-- Orders Tab -->
+      <div id="tab-orders" class="hidden">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-num" id="stat-orders">0</div><div class="stat-label">Total Orders</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-saved">₹0</div><div class="stat-label">Total Saved</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-platforms">5</div><div class="stat-label">Platforms</div></div>
+        </div>
+        <div class="section-label" style="margin-bottom:12px">Order History</div>
+        <div id="orders-list-el" class="orders-list">
+          <div style="color:var(--text3);font-size:14px;padding:20px 0;text-align:center">
+            No orders yet — place your first order from search results
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Tab -->
+      <div id="tab-profile" class="hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:600">Delivery Profile</div>
+            <div style="font-size:13px;color:var(--text2);margin-top:3px">Saved for faster checkout</div>
+          </div>
+          <button class="order-btn" onclick="toggleEditProfile()">✏ Edit</button>
+        </div>
+        <div id="profile-view" class="profile-card"></div>
+        <div id="profile-edit" class="hidden" style="margin-top:16px">
+          <div class="form-grid">
+            <div class="form-row"><label class="form-label">Full Name</label><input class="form-input" id="pf-name" placeholder="Rahul Sharma"></div>
+            <div class="form-row"><label class="form-label">Phone</label><input class="form-input" id="pf-phone" placeholder="+91 98765 43210"></div>
+          </div>
+          <div class="form-row"><label class="form-label">Email</label><input class="form-input" id="pf-email" placeholder="rahul@example.com"></div>
+          <div class="form-row"><label class="form-label">Address Line 1</label><input class="form-input" id="pf-addr1" placeholder="12, MG Road"></div>
+          <div class="form-row"><label class="form-label">Address Line 2</label><input class="form-input" id="pf-addr2" placeholder="Near Metro Station"></div>
+          <div class="form-grid">
+            <div class="form-row"><label class="form-label">City</label><input class="form-input" id="pf-city" placeholder="Gurugram"></div>
+            <div class="form-row"><label class="form-label">State</label><input class="form-input" id="pf-state" placeholder="Haryana"></div>
+          </div>
+          <div class="form-grid">
+            <div class="form-row"><label class="form-label">Pincode</label><input class="form-input" id="pf-pin" placeholder="122001"></div>
+            <div class="form-row"><label class="form-label">Country</label><input class="form-input" id="pf-country" value="India"></div>
+          </div>
+          <button class="search-btn" onclick="saveProfile()" style="margin-top:8px">💾 Save Profile</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Order Modal -->
+<div class="modal-wrap hidden" id="order-modal">
+  <div class="modal">
+    <div class="modal-title">Place Order</div>
+    <div class="modal-sub" id="modal-product-name">Placing order for...</div>
+    <div class="section-label" style="margin-bottom:8px">Delivery Address</div>
+    <div class="form-grid">
+      <div class="form-row"><label class="form-label">Full Name</label><input class="form-input" id="ord-name"></div>
+      <div class="form-row"><label class="form-label">Phone</label><input class="form-input" id="ord-phone"></div>
+    </div>
+    <div class="form-row"><label class="form-label">Email (for confirmation)</label><input class="form-input" id="ord-email"></div>
+    <div class="form-row"><label class="form-label">Address</label><input class="form-input" id="ord-addr"></div>
+    <div class="form-grid">
+      <div class="form-row"><label class="form-label">City</label><input class="form-input" id="ord-city"></div>
+      <div class="form-row"><label class="form-label">State</label><input class="form-input" id="ord-state"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-row"><label class="form-label">Pincode</label><input class="form-input" id="ord-pin"></div>
+      <div class="form-row"><label class="form-label">Country</label><input class="form-input" id="ord-country" value="India"></div>
+    </div>
+    <div class="section-label" style="margin:12px 0 8px">Payment Method</div>
+    <div class="payment-opts" id="payment-opts">
+      <div class="pay-opt selected" onclick="selectPay(this,'COD')">Cash on Delivery</div>
+      <div class="pay-opt" onclick="selectPay(this,'UPI')">UPI</div>
+      <div class="pay-opt" onclick="selectPay(this,'CARD')">Card</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-place" onclick="confirmOrder()" id="place-btn">✓ Confirm Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span id="toast-icon">✓</span><span id="toast-msg">Done</span></div>
+
+<script>
+const BASE = 'http://localhost:8000/api/v1';
+let currentProduct = null;
+let imageBase64 = null;
+let paymentMethod = 'COD';
+let orders = [];
+let profile = null;
+
+const platformColors = {amazon:'#FF9900',flipkart:'#2874F0',croma:'#9B2335',zepto:'#7C3AED',myntra:'#FF3F6C'};
+const platformEmoji = {amazon:'📦',flipkart:'🛒',croma:'🏪',zepto:'⚡',myntra:'👗'};
+
+function setTab(t){
+  ['search','orders','profile'].forEach(tab=>{
+    document.getElementById('tab-'+tab).classList.toggle('hidden',tab!==t);
+    const btn = [...document.querySelectorAll('.nav-btn')].find(b=>b.textContent.toLowerCase()===tab);
+    if(btn) btn.classList.toggle('active',tab===t);
+  });
+  if(t==='orders') renderOrders();
+  if(t==='profile') renderProfile();
+}
+
+function toggleChip(el){el.classList.toggle('active')}
+
+function getActivePlatforms(){
+  return [...document.querySelectorAll('.chip.active')].map(c=>c.dataset.p);
+}
+
+function quickSearch(q){
+  document.getElementById('query-input').value = q;
+  setTab('search');
+  runSearch();
+}
+
+function handleImageUpload(input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    const b64 = e.target.result.split(',')[1];
+    imageBase64 = b64;
+    const preview = document.getElementById('img-preview');
+    preview.src = e.target.result;
+    preview.classList.remove('hidden');
+    document.getElementById('upload-zone').classList.add('has-image');
+    document.querySelector('#upload-zone div').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+function setAgentState(id, state, msg){
+  const row = document.getElementById('ag-'+id);
+  if(!row) return;
+  row.className = 'agent-row '+(state||'');
+  if(msg) document.getElementById('ag-'+id+'-msg').textContent = msg;
+}
+
+function resetPipeline(){
+  ['recognition','search','deals','filter','complete'].forEach(id=>{
+    setAgentState(id,'','');
+    const msgs = {recognition:'Gemini Vision · identify product',search:'Parallel scrape 5 platforms',deals:'CouponDunia · live coupons',filter:'Genuineness · anti-fake scoring',complete:'Results ready'};
+    document.getElementById('ag-'+id+'-msg').textContent = msgs[id];
+  });
+}
+
+async function runSearch(){
+  const query = document.getElementById('query-input').value.trim();
+  if(!query && !imageBase64){ showToast('Enter a product name or upload an image','error'); return; }
+  
+  const platforms = getActivePlatforms();
+  if(!platforms.length){ showToast('Select at least one platform','error'); return; }
+  
+  const btn = document.getElementById('search-btn');
+  const content = document.getElementById('search-btn-content');
+  btn.disabled = true;
+  content.innerHTML = '<div class="spinner"></div> Searching...';
+  
+  document.getElementById('empty-state').classList.add('hidden');
+  document.getElementById('results-area').classList.add('hidden');
+  resetPipeline();
+  
+  const evtSource = new EventSource(`${BASE}/search/stream`);
+  
+  // Start SSE stream via POST (workaround — use fetch for POST then SSE-like reading)
+  evtSource.close(); // close EventSource, use fetch streaming
+  
+  const body = {query: query||null, image_base64: imageBase64||null, platforms, max_results:5};
+  
+  setAgentState('recognition','running','Identifying product with Gemini...');
+  
+  try {
+    // Use streaming endpoint
+    const resp = await fetch(`${BASE}/search/stream`,{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)
+    });
+    
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    
+    while(true){
+      const {done, value} = await reader.read();
+      if(done) break;
+      buffer += decoder.decode(value, {stream:true});
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+      for(const line of lines){
+        if(line.startsWith('data: ')){
+          try{
+            const ev = JSON.parse(line.slice(6));
+            handleAgentEvent(ev);
+          }catch(e){}
+        }
+      }
+    }
+    
+    // Now fetch full results
+    const res2 = await fetch(`${BASE}/search`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!res2.ok) throw new Error(`API error ${res2.status}`);
+    const data = await res2.json();
+    renderResults(data);
+    
+  } catch(e){
+    // Demo mode — show mock results if backend unavailable
+    console.warn('Backend unavailable, showing demo:', e);
+    setAgentState('recognition','done',`Identified: ${query||'Product'}`);
+    setAgentState('search','done','All platforms searched');
+    setAgentState('deals','done','Coupons applied');
+    setAgentState('filter','done','5 genuine results');
+    setAgentState('complete','done','Demo mode — backend offline');
+    renderResults(getMockResults(query));
+    showToast('Demo mode — connect backend for live results','error');
+  } finally {
+    btn.disabled = false;
+    content.textContent = '✦ Find Best Deals';
+  }
+}
+
+function handleAgentEvent(ev){
+  const agMap = {'recognition':'recognition','search':'search','deals':'deals','filter':'filter','complete':'complete'};
+  const agId = ev.agent.includes(':') ? 'search' : (agMap[ev.agent]||null);
+  if(!agId) return;
+  setAgentState(agId, ev.status==='done'?'done':(ev.status==='error'?'error':'running'), ev.message||'');
+}
+
+function renderResults(data){
+  const area = document.getElementById('results-area');
+  const rec = data.recognized;
+  const results = data.results||[];
+  
+  let html = `
+    <div class="results-header">
+      <div class="results-title">Found ${results.length} Results</div>
+      <div class="results-meta">${data.total_platforms_searched} platforms · ${data.search_duration_seconds}s</div>
+    </div>
+    <div class="recognized-card">
+      <div class="rec-icon">🎯</div>
+      <div>
+        <div class="rec-name">${rec.normalized_name}</div>
+        <div class="rec-specs">
+          ${(rec.key_specs||[]).map(s=>`<span class="rec-spec">${s}</span>`).join('')}
+          ${rec.category?`<span class="rec-spec">${rec.category}</span>`:''}
+        </div>
+      </div>
+      <div class="rec-conf"><div class="conf-val">${Math.round((rec.confidence||0.9)*100)}%</div><div style="font-size:11px;color:var(--text3)">confidence</div></div>
+    </div>
+    <div class="product-grid">`;
+  
+  results.forEach((r,i)=>{
+    const isBest = i===0;
+    const color = platformColors[r.platform]||'#888';
+    const emoji = platformEmoji[r.platform]||'🛒';
+    const finalPrice = r.final_price||r.price;
+    const discount = r.discount_percent||(r.original_price?Math.round((r.original_price-r.price)/r.original_price*100):0);
+    const score = Math.round((r.genuineness_score||0.9)*100);
+    
+    html += `
+    <div class="product-card ${isBest?'best':''}">
+      ${isBest?'<div class="best-label">BEST DEAL</div>':''}
+      <div class="card-top">
+        <div class="card-left">
+          <div class="platform-tag" style="background:${color}22;color:${color}">${emoji} ${r.platform_name}</div>
+          <div class="product-title">${r.title}</div>
+        </div>
+        <div class="card-right">
+          <div class="price-main">₹${Math.round(finalPrice).toLocaleString('en-IN')}</div>
+          ${r.original_price?`<div class="price-original">₹${Math.round(r.original_price).toLocaleString('en-IN')}</div>`:''}
+          ${discount?`<div class="discount-badge">−${discount}%</div>`:''}
+        </div>
+      </div>
+      <div class="card-meta">
+        ${r.rating?`<span class="meta-item">⭐ ${r.rating} (${(r.review_count||0).toLocaleString()})</span>`:''}
+        ${r.delivery_label?`<span class="meta-item">🚚 ${r.delivery_label}</span>`:''}
+        ${r.return_days?`<span class="meta-item">↩ ${r.return_days}d returns</span>`:''}
+        ${r.gst_invoice?'<span class="meta-item">🧾 GST invoice</span>':''}
+      </div>
+      <div class="card-bottom">
+        ${r.coupon_code?`<div class="coupon-pill">🎟 <strong>${r.coupon_code}</strong> saves ₹${Math.round(r.coupon_discount||0)}</div>`:'<div></div>'}
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="score-bar">
+            <div class="score-track"><div class="score-fill" style="width:${score}%"></div></div>
+            <span>${score}% genuine</span>
+          </div>
+          <a href="${r.url}" target="_blank" class="btn-cancel" style="padding:7px 14px; margin-right:4px; text-decoration:none; display:inline-block; font-size:14px; pointer-events:auto; position:relative; z-index:10;">View</a>
+          <button class="order-btn" onclick="openOrderModal(${i})" style="pointer-events:auto; position:relative; z-index:10;">Buy Now</button>
+        </div>
+      </div>
+    </div>`;
+  });
+  
+  html += '</div>';
+  area.innerHTML = html;
+  area.classList.remove('hidden');
+  
+  // Store results for ordering
+  window._results = results;
+}
+
+function openOrderModal(idx){
+  currentProduct = window._results?.[idx];
+  if(!currentProduct) return;
+  document.getElementById('modal-product-name').textContent = `${currentProduct.title} · ₹${Math.round(currentProduct.final_price||currentProduct.price).toLocaleString('en-IN')} on ${currentProduct.platform_name}`;
+  
+  if(profile){
+    document.getElementById('ord-name').value = profile.full_name||'';
+    document.getElementById('ord-phone').value = profile.phone||'';
+    document.getElementById('ord-email').value = profile.email||'';
+    document.getElementById('ord-addr').value = profile.address_line1||'';
+    document.getElementById('ord-city').value = profile.city||'';
+    document.getElementById('ord-state').value = profile.state||'';
+    document.getElementById('ord-pin').value = profile.pincode||'';
+  }
+  document.getElementById('order-modal').classList.remove('hidden');
+}
+
+function closeModal(){ document.getElementById('order-modal').classList.add('hidden'); }
+
+function selectPay(el, method){
+  paymentMethod = method;
+  document.querySelectorAll('.pay-opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+async function confirmOrder(){
+  if(!currentProduct) return;
+  const profileData = {
+    full_name: document.getElementById('ord-name').value,
+    phone: document.getElementById('ord-phone').value,
+    email: document.getElementById('ord-email').value,
+    address_line1: document.getElementById('ord-addr').value,
+    city: document.getElementById('ord-city').value,
+    state: document.getElementById('ord-state').value,
+    pincode: document.getElementById('ord-pin').value,
+    country: document.getElementById('ord-country').value,
+  };
+  if(!profileData.full_name||!profileData.email){ showToast('Fill in name and email at minimum','error'); return; }
+  
+  const btn = document.getElementById('place-btn');
+  btn.textContent = 'Processing...'; btn.disabled = true;
+  
+  const reqBody = {product:currentProduct,profile:profileData,payment_method:paymentMethod};
+
+  try{
+    if(paymentMethod === "UPI" || paymentMethod === "CARD"){
+       const createRes = await fetch(`${BASE}/payment/create`,{
+         method:'POST',headers:{'Content-Type':'application/json'},
+         body:JSON.stringify(reqBody)
+       });
+       if(!createRes.ok) throw new Error('Payment creation failed');
+       const pData = await createRes.json();
+       
+       if (pData.key_id === "mock_key_id" || !pData.key_id) {
+           showToast('Razorpay mock mode', 'success');
+           const resp = await fetch(`${BASE}/order`,{
+              method:'POST',headers:{'Content-Type':'application/json'},
+              body:JSON.stringify(reqBody)
+           });
+           const conf = await resp.json();
+           orders.push(conf);
+           closeModal();
+           showToast(`Order ${conf.order_id} placed!`, 'success');
+           if(typeof renderOrders === 'function') renderOrders();
+           btn.textContent = '✓ Confirm Order'; btn.disabled = false;
+           return;
+       }
+       
+       const options = {
+         "key": pData.key_id,
+         "amount": pData.amount,
+         "currency": pData.currency,
+         "name": "ShopMind AI",
+         "description": currentProduct.title,
+         "order_id": pData.razorpay_order_id,
+         "handler": async function (response){
+             btn.textContent = 'Verifying...';
+             const verifyBody = {
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                order_request: reqBody
+             };
+             const verifyRes = await fetch(`${BASE}/payment/verify`, {
+                 method: 'POST', headers: {'Content-Type':'application/json'},
+                 body: JSON.stringify(verifyBody)
+             });
+             if(!verifyRes.ok) {
+                 showToast('Signature mismatch or verification failed', 'error');
+                 btn.textContent = '✓ Confirm Order'; btn.disabled = false;
+                 return;
+             }
+             const conf = await verifyRes.json();
+             orders.push(conf);
+             closeModal();
+             showToast(`Order ${conf.order_id} placed!`, 'success');
+             if(typeof renderOrders === 'function') renderOrders();
+             btn.textContent = '✓ Confirm Order'; btn.disabled = false;
+         },
+         "prefill": {
+             "name": profileData.full_name,
+             "email": profileData.email,
+             "contact": profileData.phone
+         },
+         "theme": { "color": "#6C63FF" }
+       };
+       const rzp = new Razorpay(options);
+       rzp.on('payment.failed', function(res){
+            showToast('Payment Failed: ' + res.error.description, 'error');
+            btn.textContent = '✓ Confirm Order'; btn.disabled = false;
+       });
+       rzp.open();
+
+    } else {
+        const resp = await fetch(`${BASE}/order`,{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify(reqBody)
+        });
+        if(!resp.ok) throw new Error('Order API failed');
+        const conf = await resp.json();
+        orders.push(conf);
+        closeModal();
+        showToast(`Order ${conf.order_id} placed! Confirmation sent.`, 'success');
+        if(typeof renderOrders === 'function') renderOrders();
+        btn.textContent = '✓ Confirm Order'; btn.disabled = false;
+    }
+  } catch(e){
+    // Demo mode
+    const mockConf = {
+      order_id: 'AMZ-'+Math.random().toString(36).slice(2,10).toUpperCase(),
+      platform: currentProduct.platform,
+      platform_name: currentProduct.platform_name,
+      product_title: currentProduct.title,
+      product_url: currentProduct.url,
+      amount_paid: currentProduct.final_price||currentProduct.price,
+      coupon_applied: currentProduct.coupon_code||null,
+      delivery_address: `${profileData.address_line1}, ${profileData.city}`,
+      expected_delivery_date: new Date(Date.now()+3*86400000).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'}),
+      email_sent_to: profileData.email,
+      timestamp: new Date().toISOString(),
+      payment_status: paymentMethod==="COD" ? "pending" : "success",
+      transaction_id: paymentMethod==="COD" ? null : "pay_" + Math.random().toString(36).slice(2,10).toUpperCase(),
+    };
+    orders.push(mockConf);
+    profile = profileData;
+    closeModal();
+    showToast(`Order ${mockConf.order_id} placed! (demo mode)`,'success');
+    if(typeof renderOrders === 'function') renderOrders();
+    btn.textContent = '✓ Confirm Order'; btn.disabled = false;
+  }
+}
+
+function renderOrders(){
+  const el = document.getElementById('orders-list-el');
+  const statEl = document.getElementById('stat-orders');
+  const savedEl = document.getElementById('stat-saved');
+  
+  statEl.textContent = orders.length;
+  const saved = orders.reduce((s,o)=>{
+    const orig = window._results?.find(r=>r.platform===o.platform)?.original_price||0;
+    return s + (orig ? orig - o.amount_paid : 0);
+  },0);
+  savedEl.textContent = '₹'+Math.round(saved).toLocaleString('en-IN');
+  
+  if(!orders.length){
+    el.innerHTML = '<div style="color:var(--text3);font-size:14px;padding:20px 0;text-align:center">No orders yet — place your first order from search results</div>';
+    return;
+  }
+  el.innerHTML = orders.map(o=>`
+    <div class="order-row">
+      <div class="order-platform-dot" style="background:${platformColors[o.platform]||'#888'}"></div>
+      <div class="order-info">
+        <div class="order-id-text">${o.order_id} 
+          ${o.transaction_id ? ` · Txn: ${o.transaction_id} <span style="color:var(--green)">[${o.payment_status}]</span>` : ''}
+        </div>
+        <div class="order-title"><a href="${o.product_url||'#'}" target="_blank" style="color:inherit;text-decoration:none">${o.product_title.slice(0,60)}${o.product_title.length>60?'...':''}</a></div>
+        <div class="order-meta">📅 ${o.expected_delivery_date} · ✉ ${o.email_sent_to}</div>
+      </div>
+      <div class="order-amount">₹${Math.round(o.amount_paid).toLocaleString('en-IN')}</div>
+    </div>`).join('');
+}
+
+function renderProfile(){
+  const el = document.getElementById('profile-view');
+  if(!profile){
+    el.innerHTML = '<div style="color:var(--text3);font-size:14px;text-align:center;padding:20px">No profile saved yet. Click Edit to add your delivery details.</div>';
+    return;
+  }
+  const fields = [
+    ['Full Name',profile.full_name],['Phone',profile.phone],['Email',profile.email],
+    ['Address',profile.address_line1+(profile.address_line2?' '+profile.address_line2:'')],
+    ['City',profile.city],['State',profile.state],['Pincode',profile.pincode],['Country',profile.country||'India']
+  ];
+  el.innerHTML = fields.map(([k,v])=>`<div class="profile-field"><span class="profile-key">${k}</span><span class="profile-val">${v||'—'}</span></div>`).join('');
+}
+
+function toggleEditProfile(){
+  const edit = document.getElementById('profile-edit');
+  edit.classList.toggle('hidden');
+  if(!edit.classList.contains('hidden') && profile){
+    document.getElementById('pf-name').value = profile.full_name||'';
+    document.getElementById('pf-phone').value = profile.phone||'';
+    document.getElementById('pf-email').value = profile.email||'';
+    document.getElementById('pf-addr1').value = profile.address_line1||'';
+    document.getElementById('pf-addr2').value = profile.address_line2||'';
+    document.getElementById('pf-city').value = profile.city||'';
+    document.getElementById('pf-state').value = profile.state||'';
+    document.getElementById('pf-pin').value = profile.pincode||'';
+  }
+}
+
+async function saveProfile(){
+  const p = {
+    full_name: document.getElementById('pf-name').value,
+    phone: document.getElementById('pf-phone').value,
+    email: document.getElementById('pf-email').value,
+    address_line1: document.getElementById('pf-addr1').value,
+    address_line2: document.getElementById('pf-addr2').value||undefined,
+    city: document.getElementById('pf-city').value,
+    state: document.getElementById('pf-state').value,
+    pincode: document.getElementById('pf-pin').value,
+    country: document.getElementById('pf-country').value||'India',
+  };
+  if(!p.email){ showToast('Email is required','error'); return; }
+  try{
+    await fetch(`${BASE}/profile`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});
+  } catch(e){}
+  profile = p;
+  document.getElementById('profile-edit').classList.add('hidden');
+  renderProfile();
+  showToast('Profile saved!','success');
+}
+
+function getMockResults(query){
+  const name = query||'Product';
+  return {
+    recognized:{normalized_name:name,brand:name.split(' ')[0],category:'electronics',key_specs:['Latest model','Premium quality'],confidence:0.92},
+    results:[
+      {platform:'amazon',platform_name:'Amazon India',title:`${name} - Official Model`,price:28999,original_price:34999,discount_percent:17,rating:4.4,review_count:2847,url:'#',delivery_days:2,delivery_label:'Free delivery in 2 days',gst_invoice:true,return_days:10,genuineness_score:0.96,coupon_code:'HDFC5',coupon_discount:1450,final_price:27549},
+      {platform:'flipkart',platform_name:'Flipkart',title:`${name} - Flipkart SmartBuy`,price:29499,original_price:35000,discount_percent:16,rating:4.3,review_count:1923,url:'#',delivery_days:3,delivery_label:'Free by Thu',gst_invoice:true,return_days:7,genuineness_score:0.91,coupon_code:'FKFIRST',coupon_discount:2950,final_price:26549},
+      {platform:'croma',platform_name:'Croma',title:`${name} - Authorized Croma`,price:30999,rating:4.6,review_count:412,url:'#',delivery_days:4,delivery_label:'Free delivery',gst_invoice:true,return_days:7,genuineness_score:0.98,coupon_code:'CROMA500',coupon_discount:500,final_price:30499},
+    ],
+    best_deal:null,
+    total_platforms_searched:5,
+    search_duration_seconds:2.34,
+  };
+}
+
+function showToast(msg, type='success'){
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-icon').textContent = type==='success'?'✓':'⚠';
+  t.className = `toast show ${type}`;
+  setTimeout(()=>t.classList.remove('show'),4000);
+}
+
+// Check backend health on load
+(async()=>{
+  try{
+    const r = await fetch(`${BASE}/health`,{signal:AbortSignal.timeout(3000)});
+    if(r.ok){
+      document.getElementById('api-status-text').textContent = 'Connected · FastAPI :8000';
+    } else throw new Error();
+  } catch(e){
+    document.getElementById('api-status-text').textContent = 'Backend offline · Demo mode';
+    document.querySelector('.dot').style.background = 'var(--amber)';
+  }
+})();
+</script>
+</body>
+</html>
