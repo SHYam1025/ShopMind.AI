@@ -1,4 +1,4 @@
-<![CDATA[<div align="center">
+<div align="center">
 
 <img src="assets/banner.png" alt="ShopMind.AI Banner" width="100%" />
 
@@ -26,8 +26,6 @@ _An autonomous AI system that searches, compares, verifies, and orders products 
 
 [🚀 Quick Start](#-quick-start) · [📸 Screenshots](#-screenshots) · [🏗️ Architecture](#%EF%B8%8F-system-architecture) · [📡 API Reference](#-api-reference) · [🗺️ Roadmap](#%EF%B8%8F-feature-roadmap)
 
-<br/>
-
 </div>
 
 ---
@@ -35,29 +33,21 @@ _An autonomous AI system that searches, compares, verifies, and orders products 
 ## 📸 Screenshots
 
 <div align="center">
-
 <table>
 <tr>
 <td width="50%">
-
 <img src="assets/ui-search.png" alt="ShopMind Search Interface" width="100%" />
-
 <p align="center"><em>🔍 Live Agent Pipeline — Real-time search with SSE streaming</em></p>
-
 </td>
 <td width="50%">
-
 <img src="assets/ui-results.png" alt="ShopMind Results View" width="100%" />
-
 <p align="center"><em>🎯 Product Recognition — AI-identified specs with confidence score</em></p>
-
 </td>
 </tr>
 </table>
-
 </div>
 
-> **🎬 Demo Recording:** _Drop a `.mp4` or `.gif` file into `assets/demo.mp4` and uncomment the line below._
+> **🎬 Demo Recording:** _Add a `.mp4` or `.gif` to `assets/demo.mp4` and uncomment below._
 >
 > <!-- https://github.com/user-attachments/assets/YOUR_VIDEO_ID -->
 
@@ -69,7 +59,7 @@ ShopMind.AI is a **production-grade multi-agent system** that automates the enti
 
 | Step | What Happens | Agent |
 |:----:|:-------------|:------|
-| **1** | User describes a product via text or uploads an image | —  |
+| **1** | User describes a product via text or uploads an image | — |
 | **2** | AI identifies the exact product, brand, model & specs | 🔎 Recognition Agent |
 | **3** | 5 e-commerce platforms are scraped **simultaneously** | 🌐 Search Agent |
 | **4** | Live coupon codes are fetched and applied to results | 🏷️ Deal Agent |
@@ -83,9 +73,7 @@ ShopMind.AI is a **production-grade multi-agent system** that automates the enti
 ## 🏗️ System Architecture
 
 <div align="center">
-
 <img src="assets/architecture.png" alt="ShopMind.AI Architecture" width="85%" />
-
 </div>
 
 <br/>
@@ -94,15 +82,15 @@ ShopMind.AI is a **production-grade multi-agent system** that automates the enti
 
 ```mermaid
 flowchart LR
-    A["🗣️ User Query<br/>(Text / Image)"] --> B["🔎 Recognition Agent<br/>Gemini 2.0 Flash"]
-    B --> C["🌐 Search Agent<br/>Parallel Scraping"]
-    C --> D["🏷️ Deal Agent<br/>Coupon Enrichment"]
-    D --> E["🛡️ Filter Agent<br/>Genuineness Scoring"]
-    E --> F["📊 Results<br/>Top N Ranked"]
+    A["🗣️ User Query\n(Text / Image)"] --> B["🔎 Recognition Agent\nGemini 2.0 Flash"]
+    B --> C["🌐 Search Agent\nParallel Scraping"]
+    C --> D["🏷️ Deal Agent\nCoupon Enrichment"]
+    D --> E["🛡️ Filter Agent\nGenuineness Scoring"]
+    E --> F["📊 Results\nTop N Ranked"]
 
-    F --> G["💳 Payment Agent<br/>Razorpay"]
-    G --> H["📦 Order Agent<br/>Playwright Automation"]
-    H --> I["📧 Email Agent<br/>SMTP Confirmation"]
+    F --> G["💳 Payment Agent\nRazorpay"]
+    G --> H["📦 Order Agent\nPlaywright Automation"]
+    H --> I["📧 Email Agent\nSMTP Confirmation"]
 
     C --> P1["🟠 Amazon India"]
     C --> P2["🔵 Flipkart"]
@@ -110,7 +98,7 @@ flowchart LR
     C --> P4["🟣 Zepto"]
     C --> P5["🩷 Myntra"]
 
-    D --> CS["🎟️ CouponDunia<br/>GrabOn · CashKaro"]
+    D --> CS["🎟️ CouponDunia\nGrabOn · CashKaro"]
 
     style A fill:#1a1a2e,stroke:#6C63FF,color:#F0EFF8
     style B fill:#1a1a2e,stroke:#6C63FF,color:#F0EFF8
@@ -134,12 +122,12 @@ sequenceDiagram
 
     User->>API: POST /api/v1/search/stream
     API->>Orc: run_search_streaming()
-    
+
     loop For Each Agent
         Orc->>Agents: Execute agent
         Agents-->>Orc: Result
         Orc-->>API: AgentStatus event
-        API-->>User: SSE: data: {"agent": "...", "status": "done"}
+        API-->>User: SSE data event
     end
 
     User->>API: POST /api/v1/search (full results)
@@ -152,7 +140,6 @@ sequenceDiagram
 
 <details>
 <summary><b>🔎 Agent 1 — Recognition Agent</b> · <code>agents/recognition_agent.py</code></summary>
-
 <br/>
 
 **Purpose:** Identifies the exact product from natural language text or an uploaded image.
@@ -166,24 +153,21 @@ sequenceDiagram
 | **Retry Logic** | Exponential backoff (5 attempts) for 429 rate limits |
 | **Image Detection** | Auto-detects JPEG/PNG from base64 header bytes |
 
-```
-Output Schema:
+```json
 {
   "normalized_name": "Sony WH-1000XM5",
   "brand": "Sony",
   "model": "WH-1000XM5",
   "category": "electronics",
   "key_specs": ["ANC", "30hr battery", "Bluetooth 5.3"],
-  "search_terms": ["Sony WH1000XM5 headphone", ...],
+  "search_terms": ["Sony WH1000XM5 headphone", "..."],
   "confidence": 0.95
 }
 ```
-
 </details>
 
 <details>
 <summary><b>🌐 Agent 2 — Search Agent</b> · <code>agents/search_agent.py</code></summary>
-
 <br/>
 
 **Purpose:** Searches all platforms **in parallel** using `asyncio.gather` and Playwright browser automation.
@@ -199,12 +183,10 @@ Output Schema:
 - **Anti-detection:** Custom user agents, viewport spoofing, locale/timezone injection
 - **Resource blocking:** Media & fonts blocked for speed, images kept for product detection
 - **Fallback selectors:** Each platform has 3–6 CSS selector strategies with graceful degradation
-
 </details>
 
 <details>
 <summary><b>🏷️ Agent 3 — Deal Agent</b> · <code>agents/deal_agent.py</code></summary>
-
 <br/>
 
 **Purpose:** Finds and applies the best available coupon code for each product result.
@@ -215,24 +197,21 @@ Output Schema:
 
 ```
 Example coupons applied:
-  Amazon  → SAVE10 (10% off, min ₹1,000) | SBIEMI (₹500 flat, min ₹10,000)
-  Flipkart → FKFIRST (10%, min ₹1,000) | AXISBANK (₹250 flat)
+  Amazon   → SAVE10 (10% off, min ₹1,000)  | SBIEMI (₹500 flat, min ₹10,000)
+  Flipkart → FKFIRST (10%, min ₹1,000)     | AXISBANK (₹250 flat)
   Myntra   → STYLE20 (20% off, min ₹800)
 ```
 
 Each result's `final_price` is recalculated after the best coupon is applied.
-
 </details>
 
 <details>
 <summary><b>🛡️ Agent 4 — Filter Agent</b> · <code>agents/filter_agent.py</code></summary>
-
 <br/>
 
 **Purpose:** Scores each listing for authenticity using a **hybrid heuristic + AI** approach.
 
 **Scoring Pipeline:**
-
 ```
 Base Score (platform trust)
   └─ Amazon: 0.85 │ Flipkart: 0.82 │ Croma: 0.95 │ Myntra: 0.88 │ Zepto: 0.80
@@ -244,12 +223,10 @@ Base Score (platform trust)
 ```
 
 Results below **0.50** are filtered out. Remaining results are sorted by `(−genuineness_score, +final_price)`.
-
 </details>
 
 <details>
 <summary><b>💳 Agent 5 — Payment Agent</b> · <code>agents/payment_agent.py</code></summary>
-
 <br/>
 
 **Purpose:** Integrates Razorpay for secure UPI/Card payments with server-side signature verification.
@@ -261,12 +238,10 @@ Results below **0.50** are filtered out. Remaining results are sorted by `(−ge
 | **Verification** | HMAC-SHA256 signature verification |
 | **Mock mode** | Auto-enabled when Razorpay keys are absent |
 | **Frontend** | Razorpay Checkout.js modal integration |
-
 </details>
 
 <details>
 <summary><b>📦 Agent 6 — Order Agent</b> · <code>agents/order_agent.py</code></summary>
-
 <br/>
 
 **Purpose:** Places the order on the target platform using Playwright browser automation.
@@ -278,12 +253,10 @@ Results below **0.50** are filtered out. Remaining results are sorted by `(−ge
 - `_order_myntra()` / `_order_zepto()` — Automated flow initiation
 
 Each order generates a unique ID (e.g., `AMZ-A3F92BC1DA`, `FK-7E2C1A9B03`).
-
 </details>
 
 <details>
 <summary><b>📧 Agent 7 — Email Agent</b> · <code>agents/email_agent.py</code></summary>
-
 <br/>
 
 **Purpose:** Sends a rich HTML confirmation email via Gmail SMTP.
@@ -297,7 +270,6 @@ Each order generates a unique ID (e.g., `AMZ-A3F92BC1DA`, `FK-7E2C1A9B03`).
 - 🔗 Tracking link (when available)
 
 Uses TLS encryption via `smtplib` with Gmail App Password authentication.
-
 </details>
 
 ---
@@ -414,12 +386,11 @@ All endpoints are prefixed with `/api/v1`.
       "url": "https://amazon.in/dp/..."
     }
   ],
-  "best_deal": { ... },
+  "best_deal": { "..." : "..." },
   "total_platforms_searched": 5,
   "search_duration_seconds": 18.42
 }
 ```
-
 </details>
 
 ### Payment & Orders
@@ -429,15 +400,15 @@ All endpoints are prefixed with `/api/v1`.
 | `POST` | `/payment/create` | Create a Razorpay order for UPI/Card payment |
 | `POST` | `/payment/verify` | Verify Razorpay signature & place the order |
 | `POST` | `/order` | Place a COD order directly (bypasses payment gateway) |
-| `GET`  | `/orders/{email}` | Retrieve order history for an email address |
+| `GET` | `/orders/{email}` | Retrieve order history for an email address |
 
 ### Profile & Health
 
 | Method | Endpoint | Description |
 |:------:|:---------|:------------|
-| `GET`  | `/profile/{email}` | Get saved delivery profile |
+| `GET` | `/profile/{email}` | Get saved delivery profile |
 | `POST` | `/profile` | Save/update delivery profile |
-| `GET`  | `/health` | Service health check |
+| `GET` | `/health` | Service health check |
 
 ---
 
@@ -445,27 +416,35 @@ All endpoints are prefixed with `/api/v1`.
 
 ```
 ShopMind.AI/
+│
 ├── main.py                        # FastAPI entry point + lifespan manager
+│
 ├── config/
-│   └── settings.py                # Pydantic Settings (env vars, platform configs, coupon sources)
+│   └── settings.py                # Pydantic Settings · env vars · platform configs · coupon sources
+│
 ├── models/
-│   └── schemas.py                 # 12 Pydantic models (request/response/internal)
+│   └── schemas.py                 # 12 Pydantic models (request / response / internal)
+│
 ├── agents/
 │   ├── orchestrator.py            # Master coordinator — runs all agents in sequence
-│   ├── recognition_agent.py       # Agent 1: Gemini Vision product identification
-│   ├── search_agent.py            # Agent 2: Parallel multi-platform scraping
-│   ├── deal_agent.py              # Agent 3: Coupon fetching & price enrichment
-│   ├── filter_agent.py            # Agent 4: Genuineness scoring (heuristic + AI)
-│   ├── payment_agent.py           # Agent 5: Razorpay payment integration
-│   ├── order_agent.py             # Agent 6: Playwright browser automation ordering
-│   └── email_agent.py             # Agent 7: SMTP HTML email confirmation
+│   ├── recognition_agent.py       # Agent 1 → Gemini Vision product identification
+│   ├── search_agent.py            # Agent 2 → Parallel multi-platform scraping
+│   ├── deal_agent.py              # Agent 3 → Coupon fetching & price enrichment
+│   ├── filter_agent.py            # Agent 4 → Genuineness scoring (heuristic + AI)
+│   ├── payment_agent.py           # Agent 5 → Razorpay payment integration
+│   ├── order_agent.py             # Agent 6 → Playwright browser automation ordering
+│   └── email_agent.py             # Agent 7 → SMTP HTML email confirmation
+│
 ├── api/
 │   └── routes.py                  # 8 FastAPI route handlers + SSE streaming
+│
 ├── utils/
-│   ├── scraper.py                 # Playwright scrapers (Amazon, Flipkart, Croma, Zepto, Myntra)
+│   ├── scraper.py                 # Playwright scrapers (Amazon · Flipkart · Croma · Zepto · Myntra)
 │   └── storage.py                 # Async SQLite storage (profiles + order history)
+│
 ├── shopmind_ui.html               # Full-featured SPA frontend (1000+ lines)
 ├── requirements.txt               # 17 Python dependencies
+├── .env.example                   # Environment variable template
 ├── assets/                        # README images and media
 └── .env                           # Environment variables (git-ignored)
 ```
@@ -485,7 +464,7 @@ ShopMind.AI/
 | **Validation** | Pydantic v2 | Request/response schemas with strict typing |
 | **HTTP** | httpx | Async HTTP client for coupon site scraping |
 | **HTML Parsing** | BeautifulSoup4 + lxml | Fallback HTML parsing for coupon extraction |
-| **Frontend** | Vanilla HTML/CSS/JS | Dark-theme SPA with SSE live updates |
+| **Frontend** | Vanilla HTML / CSS / JS | Dark-theme SPA with SSE live updates |
 | **Fonts** | Syne + DM Sans | Modern typography via Google Fonts |
 
 ---
@@ -549,8 +528,8 @@ All configuration is managed via environment variables loaded through **Pydantic
 | `RAZORPAY_KEY_ID` | ❌ | — | Razorpay key (mock mode if absent) |
 | `RAZORPAY_KEY_SECRET` | ❌ | — | Razorpay secret |
 | `SERPAPI_KEY` | ❌ | — | SerpAPI key for enhanced search |
-| `APP_ENV` | ❌ | `development` | `development` / `production` |
-| `LOG_LEVEL` | ❌ | `INFO` | `DEBUG` / `INFO` / `WARNING` / `ERROR` |
+| `APP_ENV` | ❌ | `development` | `development` · `production` |
+| `LOG_LEVEL` | ❌ | `INFO` | `DEBUG` · `INFO` · `WARNING` · `ERROR` |
 | `HEADLESS` | ❌ | `true` | Run Chromium in headless mode |
 | `REQUEST_TIMEOUT_SECONDS` | ❌ | `20` | Scraper timeout per platform |
 | `MAX_SEARCH_RESULTS_PER_PLATFORM` | ❌ | `5` | Max results returned per platform |
@@ -569,9 +548,9 @@ Contributions are welcome! Here's how to get started:
 
 ### Code Style
 
-- Python: Follow PEP 8 with type hints
-- Commits: Use [Conventional Commits](https://www.conventionalcommits.org/) format
-- PRs: Include a clear description of changes and screenshots if UI-related
+- **Python:** Follow PEP 8 with type hints
+- **Commits:** Use [Conventional Commits](https://www.conventionalcommits.org/) format
+- **PRs:** Include a clear description of changes and screenshots if UI-related
 
 ---
 
@@ -602,4 +581,3 @@ _ShopMind.AI — Because smart shopping shouldn't be manual._
 <img src="https://img.shields.io/badge/Made_in-India_🇮🇳-FF9933?style=for-the-badge" alt="Made in India" />
 
 </div>
-]]>
